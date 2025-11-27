@@ -1,16 +1,28 @@
-# React + Vite
+💬 React Чат Колдонмосу
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Замандын талабына ылайык мессенджер, караңгы тема менен иштөө, сүрөттөрдү жөнөтүү жана профилди башкаруу мүмкүнчүлүгү бар. Курстук долбоор катары иштелип чыккан.
 
-Currently, two official plugins are available:
+🚀 Функционал
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Реалдуу убакыт: билдирүүлөрдү заматта жөнөтүү жана көрсөтүү.
 
-## React Compiler
+Медиa: сүрөттөрдү жөнөтүү жана көрүү мүмкүнчүлүгү.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Персоналдаштыруу: ысым, аватар жана колдонмонун шрифтини тандоо.
 
-## Expanding the ESLint configuration
+Темалар: Караңгы жана жарык тема менен иштөө.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Чаттарды башкаруу: каналдарды түзүү, өчүрүү жана катышуучуларды чыгаруу.
+
+Сактоо: бардык маалыматтар LocalStorageда сакталат.
+
+
+🛠 Технологиялар
+
+Frontend: React.js, Vite
+
+Стилдөө: CSS3 (Custom Properties / CSS Variables)
+
+Иконкалар: FontAwesome
+
+Маалыматтарды сактоо: Browser LocalStorage API
