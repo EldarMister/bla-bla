@@ -1,0 +1,304 @@
+/* --- 1. ФИКС НА ВЕСЬ ЭКРАН --- */
+#root { width: 100%; height: 100%; }
+.app-container { width: 100%; height: 100%; display: flex; }
+
+/* --- 2. ПЕРЕМЕННЫЕ --- */
+:root {
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* СВЕТЛАЯ ТЕМА */
+    --bg-sidebar: #f4f5f7;
+    --bg-chat: #ffffff;
+    --bg-input-area: #ffffff;
+    --bg-input-field: #ebedf0;
+    
+    --text-primary: #1a1d21;
+    --text-secondary: #707579;
+    --border-color: #dfe1e5;
+    
+    --accent-color: #3390ec;
+    --accent-hover: #287bbd;
+    --danger-color: #ff3b30;
+    
+    /* Сообщения */
+    --msg-bg-my: linear-gradient(135deg, #3390ec, #0077d9);
+    --msg-text-my: #ffffff;
+    --msg-bg-other: #ffffff;
+    --msg-text-other: #000000;
+    
+    --hover-bg: #e4e6eb;
+    --active-channel-bg: #3390ec;
+    --active-channel-text: #ffffff;
+}
+
+body.dark-mode {
+    /* ТЕМНАЯ ТЕМА */
+    --bg-sidebar: #1c1c1e;
+    --bg-chat: #000000;
+    --bg-input-area: #1c1c1e;
+    --bg-input-field: #2c2c2e;
+    
+    --text-primary: #f5f5f5;
+    --text-secondary: #a0a0a0;
+    --border-color: #2c2c2e;
+    
+    --accent-color: #3797f0;
+    --danger-color: #ed4956;
+    
+    /* Сообщения */
+    --msg-bg-my: linear-gradient(135deg, #7c4dff, #3797f0);
+    --msg-text-my: #ffffff;
+    --msg-bg-other: #262626;
+    --msg-text-other: #ffffff;
+    
+    --hover-bg: #2c2c2e;
+    --active-channel-bg: #262626;
+    --active-channel-text: #ffffff;
+}
+
+/* СБРОС */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+body { background-color: var(--bg-chat); color: var(--text-primary); height: 100vh; display: flex; overflow: hidden; }
+.app-wrapper { display: flex; width: 100%; height: 100%; }
+
+/* САЙДБАР */
+.sidebar { width: 320px; background: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+.sidebar-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+.user-mini-profile { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 5px; border-radius: 8px; }
+.user-mini-profile:hover { background-color: var(--hover-bg); }
+.avatar-circle { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+.user-details h3 { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.status-badge { font-size: 11px; color: var(--accent-color); font-weight: 500; }
+
+/* --- ВОТ ЗДЕСЬ БЫЛА ПРОБЛЕМА --- */
+.header-actions {
+    display: flex;         /* Выстраиваем в ряд */
+    align-items: center;   /* Центрируем */
+    gap: 5px;              /* Отступ между кнопками */
+}
+
+.header-actions button { 
+    background: transparent; 
+    border: none; 
+    color: var(--text-secondary); 
+    width: 32px; 
+    height: 32px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 15px; 
+}
+.header-actions button:hover { background-color: var(--hover-bg); color: var(--text-primary); }
+
+/* ПОИСК */
+.search-container { padding: 15px 15px 5px; }
+.search-input-wrapper { background: var(--bg-input-field); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; }
+.search-input-wrapper:focus-within { border-color: var(--accent-color); background: var(--bg-sidebar); }
+.search-input-wrapper input { background: transparent; border: none; outline: none; width: 100%; color: var(--text-primary); font-size: 14px; }
+
+/* СПИСОК КАНАЛОВ */
+.channels-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding-top: 10px; }
+.section-title { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: var(--text-secondary); text-transform: uppercase; }
+.section-title button { background: none; border: none; color: var(--text-secondary); cursor: pointer; } 
+#channels-list { list-style: none; overflow-y: auto; padding: 0 10px; }
+#channels-list li { padding: 8px 10px; display: flex; align-items: center; gap: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 2px; color: var(--text-primary); font-weight: 500; font-size: 14px; }
+#channels-list li:hover { background-color: var(--hover-bg); }
+#channels-list li.active { background-color: var(--active-channel-bg); color: var(--active-channel-text); }
+.channel-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; background: var(--bg-input-field); color: var(--text-secondary); object-fit: cover; }
+.list-divider { padding: 15px 12px 5px; font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; }
+
+/* ЧАТ */
+.chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-chat); position: relative; }
+.chat-header { height: 60px; padding: 0 20px; background: var(--bg-chat); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+.chat-header h2 { font-size: 16px; margin-bottom: 2px; }
+.header-status-row { font-size: 13px; color: var(--text-secondary); }
+.settings-btn { border: none; background: var(--bg-input-field); color: var(--text-primary); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.settings-btn:hover { background: var(--hover-bg); }
+
+/* СООБЩЕНИЯ */
+.messages-container { flex: 1; padding: 20px 5%; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.empty-state { margin: auto; text-align: center; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+.icon-bubble { width: 80px; height: 80px; background: var(--bg-input-field); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; margin-bottom: 15px; color: var(--accent-color); }
+
+.message { max-width: 70%; padding: 8px 12px; border-radius: 16px; font-size: 15px; line-height: 1.4; position: relative; word-wrap: break-word; min-width: 60px; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+.message.my { align-self: flex-end; background: var(--msg-bg-my); color: var(--msg-text-my); border-bottom-right-radius: 2px; }
+.message.other { align-self: flex-start; background: var(--msg-bg-other); color: var(--msg-text-other); border-bottom-left-radius: 2px; border: 1px solid rgba(0,0,0,0.05); }
+
+.message.other .msg-header { margin-bottom: 4px; display: block; }
+.message.other .msg-sender { font-size: 12px; font-weight: 700; color: var(--accent-color); display: block; }
+.msg-time { font-size: 11px; float: right; margin-left: 10px; margin-top: 6px; position: relative; top: 3px; cursor: default; }
+.message.my .msg-time { color: rgba(255,255,255,0.7); }
+.message.other .msg-time { color: var(--text-secondary); }
+
+/* ВВОД */
+.input-area { padding: 15px 20px; background: var(--bg-input-area); border-top: 1px solid var(--border-color); display: flex; gap: 10px; align-items: center; }
+.input-area input { flex: 1; padding: 10px 16px; border-radius: 18px; border: 1px solid transparent; background: var(--bg-input-field); color: var(--text-primary); outline: none; font-size: 15px; }
+.input-area input:focus { background: var(--bg-chat); border-color: var(--accent-color); }
+.input-area button { background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.input-area button:disabled { background: var(--bg-input-field); color: var(--text-secondary); }
+
+/* МОДАЛКИ */
+.modal { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
+.modal-card { background: var(--bg-chat); width: 350px; padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.app-logo { margin-bottom: 20px; font-size: 24px; text-align: center; background: linear-gradient(45deg, var(--accent-color), #8e2de2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+.modal-card input { width: 100%; padding: 10px; margin-bottom: 12px; background: var(--bg-input-field); border: 1px solid transparent; border-radius: 10px; color: var(--text-primary); outline: none; }
+.modal-card input:focus { border-color: var(--accent-color); background: var(--bg-chat); }
+.btn-primary { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; margin-top: 5px; }
+.modal-top { padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+.modal-top h2 { font-size: 18px; font-weight: 700; }
+.close-btn { background: none; border: none; font-size: 20px; color: var(--text-secondary); cursor: pointer; }
+.input-label { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block; color: var(--text-secondary); }
+.styled-select { width: 100%; padding: 10px; background: var(--bg-input-field); border: 1px solid transparent; border-radius: 10px; color: var(--text-primary); outline: none; cursor: pointer; font-size: 14px; }
+
+/* --- ИСПРАВЛЕННЫЙ БЛОК НАСТРОЕК --- */
+
+/* Настройки канала */
+.settings-card { padding: 25px; display: flex; flex-direction: column; max-height: 80vh; width: 400px; }
+.settings-content { flex: 1; overflow-y: auto; margin-bottom: 15px; }
+
+/* ИСПРАВЛЕННЫЙ ПОИСК (Красивый и ровный) */
+.search-input-wrapper.small-search { 
+    width: 100%;
+    height: 40px; /* Чуть выше */
+    background: var(--bg-input-field); 
+    border-radius: 10px; 
+    margin-bottom: 15px; 
+    position: relative; 
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+}
+.search-input-wrapper.small-search:focus-within {
+    border-color: var(--accent-color);
+    background: var(--bg-chat);
+}
+
+.search-input-wrapper.small-search input { 
+    background: transparent; 
+    border: none; 
+    border-radius: 0; 
+    padding: 0 10px 0 35px; /* Отступ слева под иконку */
+    height: 100%; 
+    width: 100%;
+    font-size: 14px; 
+    margin: 0; /* Убираем лишние отступы */
+}
+
+.search-input-wrapper.small-search i { 
+    position: absolute; 
+    left: 12px; 
+    color: var(--text-secondary); 
+    pointer-events: none;
+}
+
+/* Списки и кнопки */
+.list-title { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; }
+.user-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+.avatar-small { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 10px; }
+
+.kick-btn { 
+    border: 1px solid var(--danger-color); 
+    color: var(--danger-color); 
+    background: transparent; 
+    padding: 6px 12px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 12px; 
+    font-weight: 600; 
+    transition: 0.2s;
+}
+.kick-btn:hover { background: var(--danger-color); color: white; }
+
+.modal-footer { padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+.danger-action-btn { width: 100%; padding: 12px; border: 1px solid var(--danger-color); color: var(--danger-color); background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.danger-action-btn:hover { background: rgba(255, 59, 48, 0.1); }
+
+/* Кнопки для модалки подтверждения */
+.confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-secondary { width: 100%; padding: 10px; background: var(--bg-input-field); color: var(--text-primary); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.btn-secondary:hover { background: var(--hover-bg); }
+/* --- КРАСИВЫЙ СТИЛЬ ДЛЯ АВТОРИЗАЦИИ --- */
+
+.auth-card {
+    background: #1c1c1e; /* Чуть светлее черного фона */
+    width: 380px;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid #2c2c2e;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5); /* Глубокая тень */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-logo {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #3390ec, #a259ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Расстояние между полями ввода */
+}
+
+.auth-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #2c2c2e; /* Светлее фона, чтобы выделялось */
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.auth-input:focus {
+    background: #3a3a3c;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(51, 144, 236, 0.1);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px; /* Отступ от полей до кнопки */
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.auth-switch-text {
+    margin-top: 25px; /* Большой отступ от кнопки до текста */
+    font-size: 14px;
+    color: #8e8e93;
+    text-align: center;
+}
+
+.auth-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+    cursor: pointer;
+}
+.auth-link:hover { text-decoration: underline; }
