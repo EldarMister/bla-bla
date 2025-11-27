@@ -26,3 +26,35 @@ Frontend: React.js, Vite
 Иконкалар: FontAwesome
 
 Маалыматтарды сактоо: Browser LocalStorage API
+
+
+Резюме:
+Элдар Райымов Албанович
+Junior Frontend Developer
+Телефон: +996 220 203 021 | GitHub: github.com/EldarMister
+
+Өзүм жөнүмдө
+Башталгыч Frontend-иштеп чыгуучу, React менен SPA (Single Page Applications) түзүү тажрыйбасына ээ. Ыңгайлуу интерфейстерди түзүүгө жана таза кодго кызыгам, ошондой эле заказ менен иш алып баргам.
+
+ТЕХНИКАЛЫК ӨНӨРЛӨР
+Core: HTML5, CSS3, JavaScript (ES6+)
+Frameworks: React.js, Vite
+Куралдар: Git, GitHub, VS Code
+Башка: LocalStorage, Adaptive Layout, CSS Variables
+
+ПРОЕКТТЕР
+Chat Application (Курстук долбоор)
+Ссылка на GitHub (өз ссылкаңызды коюңуз)
+Маселелерди жөнөтүү үчүн толук функционалдуу веб-тиркеме түздүм.
+
+React Hooks (useState, useEffect) аркылуу абалды башкаруунун татаал логикасын ишке ашырдым.
+
+Backendсиз профилди башкаруу жана авторизация системасын түздүм (LocalStorage аркылуу).
+
+Караңгы тема жана CSS-параметрлер аркылуу шрифттерди динамикалык өзгөртүү функциясын киргиздим.
+
+Base64 форматындагы сүрөттөрдү жүктөө жана көрсөтүү мүмкүнчүлүгүн ишке ашырдым.
+
+
+БИЛИМ
+Okurmen IT Academy, 2025
