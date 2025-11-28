@@ -7,7 +7,7 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null);
 
-  // Инициализация при первом запуске (как твой initStorage)
+  // Инициализация при первом запуске
   useEffect(() => {
     if (!localStorage.getItem('chat_users')) {
       localStorage.setItem('chat_users', JSON.stringify(usersData));

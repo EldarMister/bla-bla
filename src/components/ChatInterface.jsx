@@ -23,7 +23,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
   const [isChannelSettingsOpen, setChannelSettingsOpen] = useState(false);
   const [participantSearch, setParticipantSearch] = useState('');
 
-  // НОВОЕ: Состояние для красивого окна подтверждения
+  // Состояние для красивого окна подтверждения
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, text: '', onConfirm: null });
 
   // --- ССЫЛКИ ---
@@ -45,7 +45,6 @@ export default function ChatInterface({ currentUser, onLogout }) {
   // --- ЛОГИКА ---
   const loadData = () => {
     let loadedChannels = JSON.parse(localStorage.getItem('chat_channels')) || [];
-    // Фикс для старых чатов без админа
     loadedChannels = loadedChannels.map(c => {
         if (!c.creatorId) return { ...c, creatorId: 1 };
         return c;
@@ -71,7 +70,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
     setCurrentFont(fontName);
   };
 
-  // НОВОЕ: Функция вызова красивого подтверждения
+  // Функция вызова подтверждения
   const triggerConfirm = (text, action) => {
     setConfirmModal({ isOpen: true, text, onConfirm: action });
   };
@@ -242,7 +241,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
             </div>
             
             <div className="settings-content">
-                {/* Исправленный поиск */}
+                {/* поиск участников */}
                 <div className="search-input-wrapper small-search">
                     <i className="fa-solid fa-magnifying-glass"></i>
                     <input type="text" placeholder="Найти участника..." value={participantSearch} onChange={(e) => setParticipantSearch(e.target.value)} />
@@ -293,7 +292,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
         </div>
       )}
 
-      {/* --- КРАСИВОЕ ОКНО ПОДТВЕРЖДЕНИЯ (Вместо confirm) --- */}
+      {/* --- КРАСИВОЕ ОКНО ПОДТВЕРЖДЕНИЯ */}
       {confirmModal.isOpen && (
         <div className="modal">
           <div className="modal-card" style={{width:'300px', textAlign:'center'}}>
