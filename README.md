@@ -1,16 +1,45 @@
-# React + Vite
+# 💬 React Chat App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Заманбап мессенджер. Караңгы тема (Dark Mode), сүрөттөрдү жөнөтүү жана профилди башкаруу мүмкүнчүлүктөрү бар. Курстук долбоор катары иштелип чыккан.
 
-Currently, two official plugins are available:
+## 🚀 Функционал
+- **Реалдуу убакыт:** Билдирүүлөрдү заматта жөнөтүү жана көрсөтүү.
+- **Медиа:** Сүрөттөрдү жөнөтүү жана көрүү мүмкүнчүлүгү (Base64).
+- **Персоналдаштыруу:** Ысымды, аватарды өзгөртүү жана шрифтти тандоо.
+- **Темалар:** Караңгы жана жарык тема менен иштөө.
+- **Чаттарды башкаруу:** Каналдарды түзүү, өчүрүү жана катышуучуларды чыгаруу.
+- **Сактоо:** Бардык маалыматтар браузердин LocalStorage эсинде сакталат.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠 Технологиялар
+- **Фронтенд:** React.js, Vite
+- **Стилдөө:** CSS3 (Custom Properties / CSS Variables)
+- **Иконкалар:** FontAwesome
+- **Маалыматтарды сактоо:** Browser LocalStorage API
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 👨‍💻 Резюме
 
-## Expanding the ESLint configuration
+**Элдар Райымов** *Junior Frontend Developer (Кенже фронтенд-иштеп чыгуучу)* 📞 Телефон: +996 220 203 021  
+🌐 GitHub: [github.com/EldarMister](https://github.com/EldarMister)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Өзүм жөнүндө
+Башталгыч Frontend-иштеп чыгуучумун. React менен SPA (Single Page Applications) түзүү тажрыйбасына ээмин. Ыңгайлуу интерфейстерди түзүүгө жана таза код жазууга кызыгам.
+
+### 💻 Техникалык өнөрлөр (Skills)
+* **Ядро:** HTML5, CSS3, JavaScript (ES6+)
+* **Фреймворктор:** React.js, Vite
+* **Куралдар:** Git, GitHub, VS Code
+* **Башка:** LocalStorage, Адаптивдүү макет (Responsive Design)
+
+### 📂 Проекттер
+**Chat Application (Курстук долбоор)** [GitHub шилтемеси](https://github.com/EldarMister/bla-bla) *(бул жерге шилтемеңди кой)*
+
+* **React Hooks** (useState, useEffect) аркылуу логиканы ишке ашырдым.
+* **LocalStorage** жардамы менен авторизация жана профиль системасын түздүм.
+* Караңгы тема жана CSS-параметрлер аркылуу шрифттерди динамикалык өзгөртүү мүмкүнчүлүгүн киргиздим.
+* **Base64** форматындагы сүрөттөрдү жүктөө жана көрсөтүүнү жасадым.
+
+---
+
+**БИЛИМ** Okurmen IT Academy, 2025-ж.
