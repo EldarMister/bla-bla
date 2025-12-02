@@ -127,11 +127,30 @@ export default function ChatInterface({ currentUser, onLogout }) {
   const saveMessage = (text, image) => {
     const newMsg = {
         id: Date.now(), channelId: activeChannelId, senderId: user.id, senderName: user.name,
-        text, image, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        text, image, isDeleted: false, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     };
     const newMsgs = [...messages, newMsg];
     setMessages(newMsgs);
     localStorage.setItem('chat_messages', JSON.stringify(newMsgs));
+  };
+
+  // --- УДАЛЕНИЕ СООБЩЕНИЯ ---
+  const deleteMessage = (msgId) => {
+    triggerConfirm('Удалить сообщение?', () => {
+        const updatedMessages = messages.map(msg => {
+            if (Number(msg.id) === Number(msgId)) { 
+                return { 
+                    ...msg, 
+                    isDeleted: true, 
+                    text: '🚫 Сообщение удалено', 
+                    image: null 
+                };
+            }
+            return msg;
+        });
+        setMessages(updatedMessages);
+        localStorage.setItem('chat_messages', JSON.stringify(updatedMessages));
+    });
   };
 
   const myChats = channels.filter(c => c.participants.includes(user.id) && c.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -141,7 +160,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
   const channelParticipants = activeChannel ? allUsers.filter(u => activeChannel.participants.includes(u.id) && u.name.toLowerCase().includes(participantSearch.toLowerCase())) : [];
 
   return (
-    <div className="app-wrapper">
+    <div className={`app-wrapper ${activeChannelId ? 'chat-active' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="user-mini-profile" onClick={() => {setEditName(user.name); setEditAvatar(user.avatar); setProfileOpen(true);}}>
@@ -171,6 +190,11 @@ export default function ChatInterface({ currentUser, onLogout }) {
 
       <main className="chat-area">
         <header className="chat-header">
+            {/* Кнопка НАЗАД для мобильных */}
+            <button className="mobile-back-btn" onClick={() => setActiveChannelId(null)}>
+                <i className="fa-solid fa-arrow-left"></i>
+            </button>
+
             <div className="chat-header-info"><h2>{activeChannel ? activeChannel.name : 'Чат не выбран'}</h2>{activeChannel && <span className="header-status-row">{activeChannel.participants.length} уч.</span>}</div>
             {activeChannel && <button className="settings-btn" onClick={() => setChannelSettingsOpen(true)}>Настройки</button>}
         </header>
@@ -182,10 +206,27 @@ export default function ChatInterface({ currentUser, onLogout }) {
              <div className="empty-state"><div className="icon-bubble"><i className="fa-regular fa-paper-plane"></i></div><h3>Ваши сообщения</h3><p>Напишите первое сообщение!</p></div>
           ) : (
              currentMessages.map(msg => (
-                <div key={msg.id} className={`message ${msg.senderId === user.id ? 'my' : 'other'}`}>
-                    {!msg.senderId !== user.id && <div className="msg-header"><span className="msg-sender">{msg.senderName}</span></div>}
-                    {msg.image && <img src={msg.image} style={{maxWidth:'200px', borderRadius:'8px', display:'block', marginBottom:'5px'}} />}
-                    {msg.text}
+                // ИСПРАВЛЕНИЕ: Number() === Number() для класса
+                <div key={msg.id} className={`message ${Number(msg.senderId) === Number(user.id) ? 'my' : 'other'} ${msg.isDeleted ? 'deleted-msg' : ''}`}>
+                    
+                    {/* КНОПКА УДАЛЕНИЯ) */}
+                    {Number(msg.senderId) === Number(user.id) && !msg.isDeleted && (
+                        <button className="msg-delete-btn" onClick={() => deleteMessage(msg.id)} style={{border:'none', background:'transparent', cursor:'pointer', color:'inherit', opacity:0.5, marginLeft:'5px'}}>
+                            <i className="fa-solid fa-trash"></i>
+                        </button>
+                    )}
+
+                    {Number(msg.senderId) !== Number(user.id) && <div className="msg-header"><span className="msg-sender">{msg.senderName}</span></div>}
+                    
+                    {msg.isDeleted ? (
+                        <span style={{fontStyle: 'italic', opacity: 0.6}}>{msg.text}</span>
+                    ) : (
+                        <>
+                            {msg.image && <img src={msg.image} style={{maxWidth:'200px', borderRadius:'8px', display:'block', marginBottom:'5px'}} />}
+                            {msg.text}
+                        </>
+                    )}
+                    
                     <span className="msg-time">{msg.time}</span>
                 </div>
              ))
@@ -241,7 +282,6 @@ export default function ChatInterface({ currentUser, onLogout }) {
             </div>
             
             <div className="settings-content">
-                {/* поиск участников */}
                 <div className="search-input-wrapper small-search">
                     <i className="fa-solid fa-magnifying-glass"></i>
                     <input type="text" placeholder="Найти участника..." value={participantSearch} onChange={(e) => setParticipantSearch(e.target.value)} />
@@ -250,18 +290,17 @@ export default function ChatInterface({ currentUser, onLogout }) {
                 <h3 className="list-title">Участники</h3>
                 <ul className="user-list">
                     {channelParticipants.map(p => {
-                        const isOwner = p.id === activeChannel.creatorId;
-                        const canKick = (activeChannel.creatorId === user.id || activeChannel.creatorId === 1) && p.id !== user.id;
+                        const isOwner = Number(p.id) === Number(activeChannel.creatorId);
+                        const canKick = (Number(activeChannel.creatorId) === Number(user.id) || Number(activeChannel.creatorId) === 1) && Number(p.id) !== Number(user.id);
                         return (
                             <li key={p.id}>
                                 <div style={{display:'flex', alignItems:'center'}}>
                                     <img src={p.avatar || `https://ui-avatars.com/api/?name=${p.name}`} className="avatar-small"/>
                                     <span>{p.name} {isOwner && <i className="fa-solid fa-crown" style={{color:'gold', marginLeft:'5px'}}></i>}</span>
                                 </div>
-                                {/* Используем новое красивое окно вместо confirm() */}
                                 {canKick && <button className="kick-btn" onClick={() => {
                                     triggerConfirm(`Исключить ${p.name}?`, () => {
-                                        const newChans = channels.map(c => c.id === activeChannelId ? {...c, participants: c.participants.filter(id => id !== p.id)} : c);
+                                        const newChans = channels.map(c => c.id === activeChannelId ? {...c, participants: c.participants.filter(id => Number(id) !== Number(p.id))} : c);
                                         setChannels(newChans); localStorage.setItem('chat_channels', JSON.stringify(newChans));
                                     });
                                 }}>Исключить</button>}
@@ -272,7 +311,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
             </div>
 
             <div className="modal-footer">
-                {activeChannel.creatorId === user.id || activeChannel.creatorId === 1 ? 
+                {Number(activeChannel.creatorId) === Number(user.id) || Number(activeChannel.creatorId) === 1 ? 
                     <button className="danger-action-btn" onClick={() => {
                         triggerConfirm('Удалить этот чат навсегда?', () => {
                             const newChans = channels.filter(c => c.id !== activeChannelId);
@@ -282,7 +321,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
                     : 
                     <button className="danger-action-btn" onClick={() => {
                         triggerConfirm('Покинуть этот чат?', () => {
-                            const newChans = channels.map(c => c.id === activeChannelId ? {...c, participants: c.participants.filter(id => id !== user.id)} : c);
+                            const newChans = channels.map(c => c.id === activeChannelId ? {...c, participants: c.participants.filter(id => Number(id) !== Number(user.id))} : c);
                             setChannels(newChans); localStorage.setItem('chat_channels', JSON.stringify(newChans)); setActiveChannelId(null); setChannelSettingsOpen(false);
                         });
                     }}>Покинуть чат</button>
@@ -292,7 +331,6 @@ export default function ChatInterface({ currentUser, onLogout }) {
         </div>
       )}
 
-      {/* --- КРАСИВОЕ ОКНО ПОДТВЕРЖДЕНИЯ */}
       {confirmModal.isOpen && (
         <div className="modal">
           <div className="modal-card" style={{width:'300px', textAlign:'center'}}>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Auth from './components/Auth';
 import ChatInterface from './components/ChatInterface';
-import { usersData, initialChannels } from './initialData';
 import './App.css';
 
 function App() {
