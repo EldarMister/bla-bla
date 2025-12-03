@@ -134,7 +134,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
     localStorage.setItem('chat_messages', JSON.stringify(newMsgs));
   };
 
-  // --- УДАЛЕНИЕ СООБЩЕНИЯ ---
+  // --- УДАЛЕНИЕ СООБЩЕНИЯ (НАДЕЖНАЯ ФУНКЦИЯ) ---
   const deleteMessage = (msgId) => {
     triggerConfirm('Удалить сообщение?', () => {
         const updatedMessages = messages.map(msg => {

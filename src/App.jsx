@@ -6,15 +6,26 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null);
 
+  // Дефолтные пользователи
+  const defaultUsers = [
+    { id: 1, name: 'Bret', username: 'bret', avatar: 'https://ui-avatars.com/api/?name=Bret' },
+    { id: 2, name: 'Antonette', username: 'antonette', avatar: 'https://ui-avatars.com/api/?name=Antonette' }
+  ];
+
+  // Дефолтные каналы
+  const initialChannels = [
+    { id: 'chan_1', name: 'Общий чат', creatorId: 1, participants: [1, 2] }
+  ];
+
   // Инициализация при первом запуске
   useEffect(() => {
     if (!localStorage.getItem('chat_users')) {
-      localStorage.setItem('chat_users', JSON.stringify(usersData));
+      localStorage.setItem('chat_users', JSON.stringify(defaultUsers));
     }
     if (!localStorage.getItem('chat_channels')) {
       localStorage.setItem('chat_channels', JSON.stringify(initialChannels));
     }
-    
+
     // Проверка авторизации
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
