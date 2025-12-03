@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import PortalModal from './PortalModal';
 
 export default function ChatInterface({ currentUser, onLogout }) {
   // --- ДАННЫЕ ---
@@ -22,6 +23,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
   const [currentFont, setCurrentFont] = useState('system');
   const [isChannelSettingsOpen, setChannelSettingsOpen] = useState(false);
   const [participantSearch, setParticipantSearch] = useState('');
+  const [channelImage, setChannelImage] = useState('');
 
   // Состояние для красивого окна подтверждения
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, text: '', onConfirm: null });
@@ -37,6 +39,14 @@ export default function ChatInterface({ currentUser, onLogout }) {
     window.addEventListener('storage', loadData);
     return () => window.removeEventListener('storage', loadData);
   }, []);
+
+  // Если открыта любая модалка — добавляем класс на body чтобы отменить CSS transform
+  useEffect(() => {
+    const anyModalOpen = isCreateModalOpen || isProfileOpen || isSettingsOpen || isChannelSettingsOpen || confirmModal.isOpen;
+    if (anyModalOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, [isCreateModalOpen, isProfileOpen, isSettingsOpen, isChannelSettingsOpen, confirmModal.isOpen]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -94,6 +104,18 @@ export default function ChatInterface({ currentUser, onLogout }) {
         setProfileOpen(false);
     }
   };
+
+  const saveChannelImage = () => {
+    if (!activeChannel) return;
+    const newChans = channels.map(c => c.id === activeChannelId ? {...c, image: channelImage} : c);
+    setChannels(newChans);
+    localStorage.setItem('chat_channels', JSON.stringify(newChans));
+    // Keep the input value so the user sees the saved URL and preview
+    // (do not clear the field immediately)
+  };
+
+  // Prefill channelImage when opening channel settings or when active channel changes
+  // (moved further down so `activeChannel` exists when building deps)
 
   const createChannel = () => {
     if (!newChannelName.trim()) return;
@@ -159,12 +181,19 @@ export default function ChatInterface({ currentUser, onLogout }) {
   const currentMessages = messages.filter(m => m.channelId === activeChannelId);
   const channelParticipants = activeChannel ? allUsers.filter(u => activeChannel.participants.includes(u.id) && u.name.toLowerCase().includes(participantSearch.toLowerCase())) : [];
 
+  // Prefill channelImage when opening channel settings or when active channel changes
+  useEffect(() => {
+    if (isChannelSettingsOpen && activeChannel) {
+      setChannelImage(activeChannel.image || '');
+    }
+  }, [isChannelSettingsOpen, activeChannel]);
+
   return (
     <div className={`app-wrapper ${activeChannelId ? 'chat-active' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div className="user-mini-profile" onClick={() => {setEditName(user.name); setEditAvatar(user.avatar); setProfileOpen(true);}}>
-            <img src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} className="avatar-circle" />
+            <div className="user-mini-profile" onClick={() => {setEditName(user.name); setEditAvatar(user.avatar); setProfileOpen(true);}}>
+            <img src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} className="avatar-circle" onError={(e)=>{e.target.onerror=null; e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`;}} />
             <div className="user-details"><h3>{user.name}</h3><span className="status-badge">Online</span></div>
           </div>
           <div className="header-actions">
@@ -179,11 +208,25 @@ export default function ChatInterface({ currentUser, onLogout }) {
         <div className="channels-section">
           <div className="section-title"><span>Сообщения</span><button onClick={() => setCreateModalOpen(true)}><i className="fa-solid fa-pen-to-square"></i></button></div>
           <ul id="channels-list">
-            {myChats.map(c => <li key={c.id} className={c.id === activeChannelId ? 'active' : ''} onClick={() => setActiveChannelId(c.id)}><div className="channel-icon"><i className="fa-solid fa-hashtag"></i></div>{c.name}</li>)}
-            {globalChats.map(c => <li key={c.id} onClick={() => {
+            {myChats.map(c => (
+              <li key={c.id} className={c.id === activeChannelId ? 'active' : ''} onClick={() => setActiveChannelId(c.id)}>
+                <div className="channel-icon">
+                  {c.image ? <img src={c.image} alt={c.name} className="channel-list-avatar" onError={(e)=>{e.target.onerror=null; e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random`;}} /> : <i className="fa-solid fa-hashtag"></i>}
+                </div>
+                {c.name}
+              </li>
+            ))}
+            {globalChats.map(c => (
+              <li key={c.id} onClick={() => {
                 const newChans = channels.map(ch => ch.id === c.id ? {...ch, participants: [...ch.participants, user.id]} : ch);
                 setChannels(newChans); localStorage.setItem('chat_channels', JSON.stringify(newChans)); setActiveChannelId(c.id);
-            }}><div className="channel-icon" style={{background:'#e1f5fe', color:'#0095f6'}}><i className="fa-solid fa-plus"></i></div>{c.name}</li>)}
+              }}>
+                <div className="channel-icon" style={{background:'#e1f5fe', color:'#0095f6'}}>
+                  {c.image ? <img src={c.image} alt={c.name} className="channel-list-avatar" onError={(e)=>{e.target.onerror=null; e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random`;}} /> : <i className="fa-solid fa-plus"></i>}
+                </div>
+                {c.name}
+              </li>
+            ))}
           </ul>
         </div>
       </aside>
@@ -195,7 +238,15 @@ export default function ChatInterface({ currentUser, onLogout }) {
                 <i className="fa-solid fa-arrow-left"></i>
             </button>
 
-            <div className="chat-header-info"><h2>{activeChannel ? activeChannel.name : 'Чат не выбран'}</h2>{activeChannel && <span className="header-status-row">{activeChannel.participants.length} уч.</span>}</div>
+            <div className="chat-header-info">
+              {activeChannel && (
+                  <img src={activeChannel.image || `https://ui-avatars.com/api/?name=${activeChannel.name}`} alt={activeChannel.name} className="avatar-circle channel-avatar" onError={(e)=>{e.target.onerror=null; e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(activeChannel.name)}&background=random`;}} />
+              )}
+              <div className="chat-header-meta">
+                <h2>{activeChannel ? activeChannel.name : 'Чат не выбран'}</h2>
+                {activeChannel && <span className="header-status-row">{activeChannel.participants.length} уч.</span>}
+              </div>
+            </div>
             {activeChannel && <button className="settings-btn" onClick={() => setChannelSettingsOpen(true)}>Настройки</button>}
         </header>
 
@@ -222,7 +273,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
                         <span style={{fontStyle: 'italic', opacity: 0.6}}>{msg.text}</span>
                     ) : (
                         <>
-                            {msg.image && <img src={msg.image} style={{maxWidth:'200px', borderRadius:'8px', display:'block', marginBottom:'5px'}} />}
+                            {msg.image && <img src={msg.image} style={{maxWidth:'200px', borderRadius:'8px', display:'block', marginBottom:'5px'}} onError={(e)=>{e.target.onerror=null; e.target.style.display='none';}} />}
                             {msg.text}
                         </>
                     )}
@@ -244,37 +295,37 @@ export default function ChatInterface({ currentUser, onLogout }) {
 
       {/* --- МОДАЛКИ --- */}
       {isCreateModalOpen && (
-        <div className="modal">
+        <PortalModal onClose={() => setCreateModalOpen(false)}>
           <div className="modal-card">
             <div className="modal-top"><h2>Новый чат</h2><button className="close-btn" onClick={() => setCreateModalOpen(false)}><i className="fa-solid fa-xmark"></i></button></div>
             <label className="input-label">Название канала</label><input type="text" value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} autoFocus />
             <button className="btn-primary" onClick={createChannel}>Создать</button>
           </div>
-        </div>
+        </PortalModal>
       )}
 
       {isProfileOpen && (
-        <div className="modal">
+        <PortalModal onClose={() => setProfileOpen(false)}>
           <div className="modal-card">
             <div className="modal-top"><h2>Профиль</h2><button className="close-btn" onClick={() => setProfileOpen(false)}><i className="fa-solid fa-xmark"></i></button></div>
             <label className="input-label">Имя</label><input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
             <label className="input-label">Аватар (ссылка)</label><input type="text" value={editAvatar} onChange={(e) => setEditAvatar(e.target.value)} placeholder="https://..." />
             <button className="btn-primary" onClick={saveProfile}>Сохранить</button>
           </div>
-        </div>
+        </PortalModal>
       )}
 
       {isSettingsOpen && (
-        <div className="modal">
+        <PortalModal onClose={() => setSettingsOpen(false)}>
           <div className="modal-card">
             <div className="modal-top"><h2>Настройки</h2><button className="close-btn" onClick={() => setSettingsOpen(false)}><i className="fa-solid fa-xmark"></i></button></div>
             <label className="input-label">Шрифт</label><select className="styled-select" value={currentFont} onChange={(e) => applyFont(e.target.value)}><option value="system">Стандарт</option><option value="serif">Serif</option><option value="mono">Mono</option></select>
           </div>
-        </div>
+        </PortalModal>
       )}
 
       {isChannelSettingsOpen && activeChannel && (
-        <div className="modal">
+        <PortalModal onClose={() => setChannelSettingsOpen(false)}>
           <div className="modal-card settings-card">
             <div className="modal-top">
                 <h2 style={{fontSize:'16px'}}>Настройки: {activeChannel.name}</h2>
@@ -282,6 +333,12 @@ export default function ChatInterface({ currentUser, onLogout }) {
             </div>
             
             <div className="settings-content">
+                <h3 className="list-title">Информация канала</h3>
+                <label className="input-label">Фото канала (ссылка)</label>
+                <input type="text" value={channelImage} onChange={(e) => setChannelImage(e.target.value)} placeholder="https://..." className="modal-card input" style={{marginBottom:'10px'}} />
+                {channelImage && <img src={channelImage} style={{maxWidth:'100%', height:'auto', borderRadius:'8px', marginBottom:'15px'}} alt="Channel" onError={(e)=>{e.target.onerror=null; e.target.style.display='none';}} />}
+                <button className="btn-primary" onClick={saveChannelImage} style={{marginBottom:'20px'}}>Сохранить фото</button>
+
                 <div className="search-input-wrapper small-search">
                     <i className="fa-solid fa-magnifying-glass"></i>
                     <input type="text" placeholder="Найти участника..." value={participantSearch} onChange={(e) => setParticipantSearch(e.target.value)} />
@@ -295,7 +352,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
                         return (
                             <li key={p.id}>
                                 <div style={{display:'flex', alignItems:'center'}}>
-                                    <img src={p.avatar || `https://ui-avatars.com/api/?name=${p.name}`} className="avatar-small"/>
+                                    <img src={p.avatar || `https://ui-avatars.com/api/?name=${p.name}`} className="avatar-small" onError={(e)=>{e.target.onerror=null; e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=random`;}} />
                                     <span>{p.name} {isOwner && <i className="fa-solid fa-crown" style={{color:'gold', marginLeft:'5px'}}></i>}</span>
                                 </div>
                                 {canKick && <button className="kick-btn" onClick={() => {
@@ -328,11 +385,11 @@ export default function ChatInterface({ currentUser, onLogout }) {
                 }
             </div>
           </div>
-        </div>
+        </PortalModal>
       )}
 
       {confirmModal.isOpen && (
-        <div className="modal">
+        <PortalModal onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}>
           <div className="modal-card" style={{width:'300px', textAlign:'center'}}>
              <h3 style={{marginBottom:'15px', fontSize:'18px'}}>{confirmModal.text}</h3>
              <div className="confirm-actions">
@@ -340,7 +397,7 @@ export default function ChatInterface({ currentUser, onLogout }) {
                 <button className="btn-primary" onClick={handleConfirmAction}>Да</button>
              </div>
           </div>
-        </div>
+        </PortalModal>
       )}
     </div>
   );

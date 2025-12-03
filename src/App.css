@@ -58,7 +58,8 @@ body.dark-mode {
 
 /* СБРОС */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
-body { background-color: var(--bg-chat); color: var(--text-primary); height: 100vh; display: flex; overflow: hidden; }
+/* Defensive fallbacks: ensure page remains visible if CSS variables are missing */
+body { background-color: var(--bg-chat, #ffffff); color: var(--text-primary, #111111); height: 100vh; display: flex; overflow: hidden; }
 .app-wrapper { display: flex; width: 100%; height: 100%; }
 
 /* САЙДБАР */
@@ -106,6 +107,10 @@ body { background-color: var(--bg-chat); color: var(--text-primary); height: 100
 #channels-list li:hover { background-color: var(--hover-bg); }
 #channels-list li.active { background-color: var(--active-channel-bg); color: var(--active-channel-text); }
 .channel-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; background: var(--bg-input-field); color: var(--text-secondary); object-fit: cover; }
+/* Avatar inside channel list */
+.channel-list-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+/* Avatar shown in chat header */
+.channel-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 1px solid var(--border-color); }
 .list-divider { padding: 15px 12px 5px; font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; }
 
 /* ЧАТ */
@@ -113,6 +118,9 @@ body { background-color: var(--bg-chat); color: var(--text-primary); height: 100
 .chat-header { height: 60px; padding: 0 20px; background: var(--bg-chat); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
 .chat-header h2 { font-size: 16px; margin-bottom: 2px; }
 .header-status-row { font-size: 13px; color: var(--text-secondary); }
+.chat-header-info { display: flex; align-items: center; gap: 12px; }
+.chat-header-meta { display: flex; flex-direction: column; justify-content: center; }
+.chat-header-meta h2 { margin: 0; }
 .settings-btn { border: none; background: var(--bg-input-field); color: var(--text-primary); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .settings-btn:hover { background: var(--hover-bg); }
 
@@ -139,8 +147,8 @@ body { background-color: var(--bg-chat); color: var(--text-primary); height: 100
 .input-area button:disabled { background: var(--bg-input-field); color: var(--text-secondary); }
 
 /* МОДАЛКИ */
-.modal { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); }
-.modal-card { background: var(--bg-chat); width: 350px; padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px); overflow-y: auto; padding: 16px; }
+.modal-card { background: var(--bg-chat); width: 350px; padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
 .app-logo { margin-bottom: 20px; font-size: 24px; text-align: center; background: linear-gradient(45deg, var(--accent-color), #8e2de2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
 .modal-card input { width: 100%; padding: 10px; margin-bottom: 12px; background: var(--bg-input-field); border: 1px solid transparent; border-radius: 10px; color: var(--text-primary); outline: none; }
 .modal-card input:focus { border-color: var(--accent-color); background: var(--bg-chat); }
@@ -154,7 +162,7 @@ body { background-color: var(--bg-chat); color: var(--text-primary); height: 100
 /* --- БЛОК НАСТРОЕК --- */
 
 /* Настройки канала */
-.settings-card { padding: 25px; display: flex; flex-direction: column; max-height: 80vh; width: 400px; }
+.settings-card { padding: 25px; display: flex; flex-direction: column; max-height: 90vh; width: 400px; overflow-y: auto; }
 .settings-content { flex: 1; overflow-y: auto; margin-bottom: 15px; }
 
 /* Поиск участников */
@@ -301,3 +309,220 @@ body { background-color: var(--bg-chat); color: var(--text-primary); height: 100
     cursor: pointer;
 }
 .auth-link:hover { text-decoration: underline; }
+
+/* --- Мобильная / планшетная раскладка для всего приложения --- */
+@media (max-width: 900px) {
+    /* Делает sidebar и chat-area полноэкранными оверлеями и переключает их через .chat-active */
+    .sidebar {
+        position: absolute;
+        width: 100%;
+        max-width: none;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        z-index: 40;
+        background: var(--bg-sidebar);
+        transform: translateX(0);
+        transition: transform 240ms ease;
+    }
+
+    .chat-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-chat);
+        transform: translateX(100%);
+        transition: transform 240ms ease;
+    }
+
+    /* When a chat is active, hide the sidebar and reveal chat area */
+    .app-wrapper.chat-active .sidebar {
+        transform: translateX(-100%);
+        pointer-events: none;
+        opacity: 0;
+    }
+    .app-wrapper.chat-active .chat-area {
+        transform: translateX(0);
+    }
+
+    /* When no chat is active, show sidebar and hide chat area */
+    .app-wrapper:not(.chat-active) .chat-area {
+        transform: translateX(100%);
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    /* Mobile back button visible only on mobile */
+    .mobile-back-btn { display: inline-flex; align-items: center; justify-content: center; width:36px; height:36px; background: transparent; border: none; color: var(--text-secondary); font-size: 16px; margin-right: 8px; }
+
+    .sidebar-header .user-details h3 { max-width: 120px; }
+
+    /* Меньшие отступы для мобильных */
+    .messages-container { padding: 12px 6%; }
+    .message { max-width: 85%; }
+
+    /* Компактная область ввода */
+    .input-area { padding: 10px; gap: 8px; }
+    .input-area input { padding: 10px 12px; font-size: 14px; }
+
+    /* Делаем модалки полноширинными с безопасными отступами */
+    .modal { align-items: flex-start; justify-content: flex-start; padding-left: 30px; padding-top: 230px; }
+    .modal-card { width: 100%; max-width: 320px; margin: 0; padding: 18px; }
+
+    /* Адаптация карточки авторизации */
+    .auth-card { width: calc(100% - 40px); max-width: 420px; padding: 28px; }
+
+    /* Элементы списка каналов — увеличенные tap-targets */
+    #channels-list li { padding: 12px 14px; font-size: 15px; }
+}
+
+/* iPad Mini (портрет) — немного сдвинуть модалки вправо для лучшего центрирования */
+@media (min-width: 700px) and (max-width: 900px) {
+    .modal { padding-left: 40px; padding-top: 200px; }
+    .modal-card { transform: translateX(40px); }
+    .settings-card { transform: translateX(40px); }
+}
+
+/* iPad Mini (портрет) — точечная подстройка для чуть ниже и правее */
+@media (min-width: 756px) and (max-width: 780px) {
+    /* iPad mini: чуть правее и чуть ниже */
+    .modal { padding-left: 100px; padding-top: 276px; }
+    .modal-card { transform: translate(100px, 36px); }
+    .settings-card { transform: translate(100px, 36px); }
+}
+
+/* iPad Air (портрет) — немного меньше сдвиг, чуть опустить */
+@media (min-width: 800px) and (max-width: 840px) {
+    /* iPad Air: правее и чуть ниже */
+    .modal { padding-left: 120px; padding-top: 300px; }
+    .modal-card { transform: translate(92px, 40px); }
+    .settings-card { transform: translate(92px, 40px); }
+}
+
+/* Small phones: nudge sidebar header (profile & actions) slightly right for
+   iPhone XR (414), iPhone 14 Pro (≈393), Pixel 7 (≈393), Galaxy S20 (360) */
+@media (min-width: 360px) and (max-width: 420px) and (orientation: portrait) {
+    .sidebar-header { padding-left: 28px; padding-right: 18px; }
+    .user-mini-profile { gap: 10px; }
+    .avatar-circle { width: 40px; height: 40px; }
+    .header-actions { gap: 10px; }
+    .search-container { padding: 12px 16px 6px; }
+}
+
+/* Десктоп: скрыть мобильную кнопку "назад" */
+@media (min-width: 901px) {
+    .mobile-back-btn { display: none; }
+
+     /* Когда открыта модалка, отменяем трансформы у sidebar/chat,
+         так как трансформированные предки создают новый containing block
+         и ломают позиционирование fixed в некоторых мобильных браузерах.
+         Это гарантирует, что модалка останется центрированной. */
+    .modal-open .sidebar,
+    .modal-open .chat-area {
+        transform: none !important;
+    }
+
+    /* Заставляем модалку занимать весь inset, чтобы она не была затронута трансформами предков */
+    .modal { position: fixed; inset: 0; justify-content: center; align-items: center; }
+}
+
+@media (min-width: 901px) and (max-width: 1280px) {
+    .modal-card { width: 100%; max-width: 520px; padding: 24px; transform: translateX(18px); }
+    .settings-card { width: 100%; max-width: 520px; padding: 24px; transform: translateX(18px); }
+}
+
+/* ---------------------------
+    Дополнительные правила
+    (реализация из туториала: responsive с breakpoints 980, 650, 480)
+    --------------------------- */
+
+/* Размер экрана меньше 980px (резиновый макет) */
+@media screen and (max-width: 980px) {
+    /* Если у вас есть контейнер с id pagewrap — сузим его до 95% */
+    #pagewrap {
+        width: 95%;
+    }
+    /* Контент/сайдбар в процентах */
+    #content {
+        width: 60%;
+        padding: 3% 4%;
+    }
+    #sidebar {
+        width: 30%;
+    }
+    #sidebar .widget {
+        padding: 8% 7%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Размер экрана меньше 650px (одноколоночный макет) */
+@media screen and (max-width: 650px) {
+    #header {
+        height: auto;
+    }
+    #searchform {
+        position: absolute;
+        top: 5px;
+        right: 0;
+    }
+    #main-nav {
+        position: static;
+    }
+    #site-logo {
+        margin: 15px 100px 5px 0;
+        position: static;
+    }
+    #site-description {
+        margin: 0 0 15px;
+        position: static;
+    }
+    #content {
+        width: auto;
+        float: none;
+        margin: 20px 0;
+    }
+    #sidebar {
+        width: 100%;
+        float: none;
+        margin: 0;
+    }
+}
+
+/* Размер экрана меньше 480px */
+@media screen and (max-width: 480px) {
+    html {
+        -webkit-text-size-adjust: none;
+    }
+    #main-nav a {
+        font-size: 90%;
+        padding: 10px 8px;
+    }
+}
+
+/* Эластичные изображения */
+img {
+    max-width: 100%;
+    height: auto;
+    /* IE8 hack left intentionally for very old support */
+    width: auto\9;
+}
+
+/* Эластичные встраиваемые видео (ratio wrapper) */
+.video {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 */
+}
+.video iframe, .video embed, .video object {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+/* Конец дополнительных правил */
